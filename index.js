@@ -115,7 +115,7 @@ app.get("/allLoanPost", async (req, res) => {
   }
 });
 
-// post for accept loan request
+//  post for accept loan request
 app.post("/offerLoan", async (req, res) => {
   try {
     console.log(req.body);
