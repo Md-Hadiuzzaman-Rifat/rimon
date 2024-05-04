@@ -1,24 +1,16 @@
-const express = require("express");
-const cors = require("cors");
-const { ObjectId } = require("mongodb");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const express = require('express');
+const cors = require('cors');
+const { ObjectId } = require('mongodb');
+const { MongoClient, ServerApiVersion } = require('mongodb');
 const app = express();
 
-// username : donation
-// password : YxTrghoTpbUSfSrX
-
-const port = process.env.port || 2020;
-app.use(
-  cors({
-    origin: "*",
-  })
-);
-app.use(express.json());
-
-
+const port = 2020;
 //Add a Mongodb URL
-const uri = `mongodb+srv://donation:YxTrghoTpbUSfSrX@firstcluster.mxvk5xz.mongodb.net/`;
+const uri = 'mongodb+srv://rimon:rimon123@demoapp.yakyuav.mongodb.net/'
 
+// You must install CORS()
+app.use(cors());
+app.use(express.json());
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -28,17 +20,61 @@ const client = new MongoClient(uri, {
   },
 });
 
+
 // rename the user and collection
-const database = client.db("donations");
-const userList = database.collection("users");
-const loanList = database.collection("loanList");
+const database = client.db('donations');
+const loanList= database.collection("loanList")
+const userList =database.collection("userList")
 const offerList = database.collection("offerList");
 
+// post for loan
+app.post("/loanPost", async (req, res) => {
+  const {
+    name,
+    amount,
+    cause,
+    desc: description,
+    email,
+    uid,
+  } = req.body || {};
+  try {
+    const result = await loanList.insertOne({
+      name,
+      email,
+      uid,
+      amount,
+      cause,
+      description,
+    });
+    console.log(result);
+    res.json(result);
+  } catch {
+    console.log("Failed to Create new Loan post");
+  }
+});
 
+//  post for accept loan request
+app.post("/offerLoan", async (req, res) => {
+  console.log(req.body);
+  try {
+    const result = await offerList.insertOne(req.body);
+    res.json(result);
+  } catch {
+    console.log("Failed to Create new Offer loan request");
+  }
+});
 
-
-app.get("/", (req, res) => {
-  res.send("Hello World!");
+// find responses of single loan post.
+app.get("/responses/:loanId", async (req, res) => {
+  try {
+    const loanId = req.params.loanId;
+    console.log(loanId);
+    const loans = await offerList.find({ loan_id: loanId });
+    const result = await loans.toArray();
+    res.send(result);
+  } catch {
+    console.log("Failed to Get specific users loan post");
+  }
 });
 
 // create logged in users collection
@@ -55,29 +91,15 @@ app.post("/addUser", async (req, res) => {
   }
 });
 
-// post for loan
-app.post("/loanPost", async (req, res) => {
+
+// find all loan post
+app.get("/allLoanPost", async (req, res) => {
   try {
-    const {
-      name,
-      amount,
-      cause,
-      desc: description,
-      email,
-      uid,
-    } = req.body || {};
-    const result = await loanList.insertOne({
-      name,
-      email,
-      uid,
-      amount,
-      cause,
-      description,
-    });
-    console.log(result);
-    res.json(result);
+    const loans = await loanList.find({});
+    const result = await loans.toArray();
+    res.send(result);
   } catch {
-    console.log("Failed to Create new Loan post");
+    console.log("Failed to Get all loan post");
   }
 });
 
@@ -104,42 +126,11 @@ app.get("/singleLoan/:id", async (req, res) => {
   }
 });
 
-// find all loan post
-app.get("/allLoanPost", async (req, res) => {
-  try {
-    const loans = await loanList.find({});
-    const result = await loans.toArray();
-    res.send(result);
-  } catch {
-    console.log("Failed to Get all loan post");
-  }
+
+app.get('/', (req, res) => {
+  res.send('Hello World!');
 });
 
-//  post for accept loan request
-app.post("/offerLoan", async (req, res) => {
-  try {
-    console.log(req.body);
-    const result = await offerList.insertOne(req.body);
-    console.log(result);
-    res.json(result);
-  } catch {
-    console.log("Failed to Create new Offer loan request");
-  }
-});
-
-// find responses of single loan post.
-app.get("/responses/:loanId", async (req, res) => {
-  try {
-    const loanId = req.params.loanId;
-    console.log(loanId);
-    const loans = await offerList.find({ loan_id: loanId });
-    const result = await loans.toArray();
-    res.send(result);
-  } catch {
-    console.log("Failed to Get specific users loan post");
-  }
-});
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+app.listen(2020, () => {
+  console.log(`Example app listening on port 'port'`);
 });
