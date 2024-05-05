@@ -126,6 +126,47 @@ app.get("/singleLoan/:id", async (req, res) => {
   }
 });
 
+// find specific user for rating 
+app.get("/findUser/:uid", async (req, res) => {
+  console.log("hitted");
+  try {
+    const uid = req.params.uid;
+    const user = await userList.findOne({ uid });
+    console.log(user);
+    res.send(user);
+  } catch {
+    console.log("Failed to Get specific users loan post");
+  }
+});
+
+app.put("/editUser/:uid", async (req, res) => {
+  try {
+    const uid = req.params.uid;
+    const{count, rate}= req.body 
+    const updateDoc = { $set: {
+      count:count,
+      rate:rate
+    } };
+    await userList.updateOne({uid:uid}, updateDoc);
+    res.send(user);
+  } catch {
+    console.log("Failed to edit user...");
+  }
+});
+
+app.post("/addUser", async (req, res) => {
+  try {
+    const user = req.body;
+    const filter = { email: user.email };
+    const option = { upsert: true };
+    const updateDoc = { $set: user };
+    const result = await userList.updateOne(filter, updateDoc, option);
+    res.json(result);
+  } catch {
+    console.log("Failed to insert user.");
+  }
+});
+
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
